@@ -1,5 +1,8 @@
 # @thingsai/okf-validator
 
+> **Experimental.** This project is under active development; the CLI flags, library
+> API, schema, and published package may change without notice. Use it with that in mind.
+
 Validate [Open Knowledge Format (OKF)](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)
 v0.2 bundles: parse markdown + YAML frontmatter and enforce OKF v0.2
 conformance. Field validation uses **one versioned default JSON Schema**
@@ -19,6 +22,9 @@ This repository is the home of three things:
    *official* OKF bundles from
    [`GoogleCloudPlatform/knowledge-catalog`](https://github.com/GoogleCloudPlatform/knowledge-catalog)
    and publishes the package to npm on version tags.
+4. **An agent skill** — `skills/okf-validate/` — that teaches coding
+   agents how to install and run the validator (see
+   [Skill](#agent-skill) below).
 
 > This project was rewritten from an authoring template (the old "starter
 > kit"). It is no longer a content-writing tool.
@@ -30,6 +36,32 @@ npm install @thingsai/okf-validator
 ```
 
 Requires Node.js ≥ 18.
+
+## Agent skill
+
+`skills/okf-validate/` is an [Agent Skills](https://agentskills.io)-standard skill
+(`SKILL.md` + YAML frontmatter) that tells an agent when to reach for the validator,
+how to install it, and what to run; a reference with the full flag list, schema model,
+and error/warning catalog lives in `skills/okf-validate/references/usage.md`.
+
+Agents discover skills from filesystem folders — there is no install command. Either
+point an installer at this repo, or copy the folder yourself:
+
+```sh
+# Open installer (npx skills from skills.sh) — install all skills or just one
+npx skills add ThingsAI-io/okf-validator
+npx skills add ThingsAI-io/okf-validator --skill okf-validate
+
+# Manual — drop the folder into any opencode discovery directory
+git clone https://github.com/ThingsAI-io/okf-validator.git ~/.agents/skills
+```
+
+Opencode watches these locations:
+
+| scope | paths |
+|---|---|
+| project | `.opencode/skills/`, `.claude/skills/`, `.agents/skills/` |
+| global | `~/.config/opencode/skills/`, `~/.claude/skills/`, `~/.agents/skills/` |
 
 ## CLI
 
