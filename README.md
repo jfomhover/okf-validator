@@ -1,250 +1,75 @@
 # @thingsai/okf-validator
 
-> **Experimental.** This project is under active development; the CLI flags, library
-> API, schema, and published package may change without notice. Use it with that in mind.
+> ⚠️ **Experimental.** Everything here may change without notice — flags, API, schema, package. Use it with that in mind.
 
-Validate [Open Knowledge Format (OKF)](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md)
-v0.2 bundles: parse markdown + YAML frontmatter and enforce OKF v0.2
-conformance. Field validation uses **one versioned default JSON Schema**
-covering only the common OKF v0.2 fields — unless a concept document
-points at a **custom schema URL** of its own, in which case that schema
-is used instead.
+Validate [OKF v0.2](https://github.com/GoogleCloudPlatform/knowledge-catalog/blob/main/okf/SPEC.md) bundles — the format Google's knowledge-catalog uses. One tool, three ways to use it:
 
-This repository is the home of three things:
+| | |
+|---|---|
+| 💻 **CLI** | `npx okf-validate <path>` — check bundles locally or in CI |
+| 🤖 **Agent skill** | teach opencode / Claude Code / Copilot to run it for you |
 
-1. **A Node package** that validates OKF bundles — a library API and a
-   `okf-validate` CLI.
-2. **A versioned default JSON Schema** at
-   `schemas/okf/v0.2/schema.json`, reachable at a stable public URL.
-   Whatever a schema doesn't cover is deliberately left to the bundle
-   editor (extensions are legal OKF, SPEC §4.1).
-3. **A CI/CD workflow** that validates the validator against the
-   *official* OKF bundles from
-   [`GoogleCloudPlatform/knowledge-catalog`](https://github.com/GoogleCloudPlatform/knowledge-catalog)
-   and publishes the package to npm on version tags.
-4. **An agent skill** — `skills/okf-validate/` — that teaches coding
-   agents how to install and run the validator (see
-   [Skill](#agent-skill) below).
+Checks OKF v0.2 conformance out of the box against a single versioned default JSON Schema — and honors your own custom schemas, per document, when you need stricter rules.
 
-> This project was rewritten from an authoring template (the old "starter
-> kit"). It is no longer a content-writing tool.
-
-## Install
+## Quick start
 
 ```sh
 npm install @thingsai/okf-validator
+npx okf-validate ./my-bundle
 ```
 
-Requires Node.js ≥ 18.
+Requires Node.js ≥ 18. Output: `errors: 0, warnings: 2` — warnings are informative, errors fail the run.
 
-## Agent skill
+## 💻 CLI
 
-`skills/okf-validate/` is an [Agent Skills](https://agentskills.io)-standard skill
-(`SKILL.md` + YAML frontmatter) that tells an agent when to reach for the validator,
-how to install it, and what to run; a reference with the full flag list, schema model,
-and error/warning catalog lives in `skills/okf-validate/references/usage.md`.
-
-Agents discover skills from filesystem folders — there is no install command. Either
-point an installer at this repo, or copy the folder yourself:
+Point it at a bundle, a folder of bundles, or a `bundles/` corpus:
 
 ```sh
-# Open installer (npx skills from skills.sh) — install all skills or just one
-npx skills add ThingsAI-io/okf-validator
-npx skills add ThingsAI-io/okf-validator --skill okf-validate
-
-# Manual — drop the folder into any opencode discovery directory
-git clone https://github.com/ThingsAI-io/okf-validator.git ~/.agents/skills
+npx okf-validate ./my-bundle                                  # one bundle
+npx okf-validate /path/to/knowledge-catalog/okf/bundles       # whole corpus
+npx okf-validate --json ./my-bundle                           # machine-readable report
+npx okf-validate --schemas ./my-schemas ./my-bundle           # resolve custom schema: paths
 ```
 
-Opencode watches these locations:
+Exit codes: `0` conformant · `1` errors · `2` usage error. `npx okf-validate --help` lists all flags.
 
-| scope | paths |
-|---|---|
-| project | `.opencode/skills/`, `.claude/skills/`, `.agents/skills/` |
-| global | `~/.config/opencode/skills/`, `~/.claude/skills/`, `~/.agents/skills/` |
+## 🤖 Agent skill
 
-## CLI
+`skills/okf-validate/` teaches a coding agent when to reach for the validator, how to install it, and what to run — then you can just say *"validate this bundle"* and let the agent take it from there.
+
+It's standard [Agent Skills](https://agentskills.io) (`SKILL.md` + frontmatter), so it works in opencode, Claude Code, Codex, GitHub Copilot CLI, Cursor, and 30+ other agents.
 
 ```sh
-npx okf-validate <path>...
+npx skills add ThingsAI-io/okf-validator                              # all skills
+npx skills add ThingsAI-io/okf-validator --skill okf-validate         # just this one
 ```
 
-Each `<path>` is a bundle root, a directory containing bundle
-subdirectories, or a directory containing a `bundles/` folder.
+Or drop `skills/okf-validate/` into any discovery directory (`.opencode/skills/`, `~/.config/opencode/skills/`, …). Full reference: `skills/okf-validate/references/usage.md`.
 
-```sh
-# Validate a single bundle
-okf-validate ./my-bundle
+## Custom schemas — your rules, per document
 
-# Validate every bundle checked into an official-style corpus
-okf-validate /path/to/knowledge-catalog/okf/bundles
+A concept's `schema:` frontmatter key chooses its validator:
 
-# Machine-readable output
-okf-validate --json ./my-bundle
+- **URL** (`https`/`http`/`file`) → fetched and enforced for that document.
+- **Path** (`schema: revenue`) + `--schemas <dir>` → resolved under that directory, with a `.schema.json` fallback.
+- **Anything else** (`okf_bundle`, absent) → the bundled default schema applies.
 
-# Validate against a schema from your own schemas directory
-okf-validate --schemas ./my-schemas ./my-bundle
-```
+The default schema is deliberately permissive: `type` is the only required field, the §5/§10 families are loosely typed, and unknown keys always pass (extensions are legal OKF). Strict per-type rules belong in a custom schema — the validator never judges what your schema requires.
 
-Exit codes: `0` when every bundle has zero errors, `1` when any bundle has
-errors, `2` for usage errors. Warnings never fail the run.
+## What it checks
 
-Run `okf-validate --help` for the full flag list (`--okf-version`,
-`--schemas`, `--json`, `--version`).
+**Errors** — the bundle is *not* conformant:
 
-## Library
+- missing, malformed, or non-mapping frontmatter; missing or empty `type`
+- reserved `index.md`/`log.md` violations (frontmatter where it isn't allowed, non-ISO date headings)
+- a `schema:` reference that can't be loaded or resolved
 
-```js
-import { validateBundle } from '@thingsai/okf-validator';
+**Warnings** — informative, never fatal:
 
-const result = await validateBundle('./my-bundle');
-console.log(result.summary()); // { errors: 0, warnings: 1 }
-result.errors.forEach((issue) => console.log(issue.file, issue.message));
-```
+- missing `index.md`, broken internal links, unresolvable path fields
+- `log.md` frontmatter / entries not newest-first, misplaced or unsupported `okf_version`
 
-Helper exports:
-
-- `parseBundle(root)` — walk a bundle without validating.
-- `loadDefaultSchema({ version })`, `buildValidators({ version })` — load
-  and compile the default OKF JSON Schema for a given version.
-- `schemaDir(version)`, `schemaJsonPath(version)` — filesystem locations
-  of a version's schema.
-- `isUrlReference(value)` — does a frontmatter `schema` value count as a
-  schema URL?
-- `readSchemaDocument(url)`, `loadSchemaFromRef(url)` — load and compile
-  a custom schema from an `http(s)` or `file` URL.
-- `loadSchemaFromFile(path)` — compile a schema from a filesystem path.
-- `resolveSchemaFile(schemasDir, ref)` — resolve a non-URL `schema` value
-  to a file under `schemasDir` (with `.schema.json` fallback).
-- `SCHEMA_BASE_URL`, `SUPPORTED_OKF_VERSIONS` — the canonical schema URL
-  base and the version list.
-
-`validateBundle` is async: a concept document whose `schema` key is a URL
-triggers a fetch of that schema, so validation can require the network.
-`validateBundle(root, { schemasDir })` resolves non-URL `schema` paths
-against a local schemas directory instead.
-
-### Validation model
-
-The validator encodes the OKF v0.2 spec's conformance split (§11):
-
-**Errors** — the bundle is *not* v0.2 conformant:
-
-- A concept `.md` without parseable, mapping-typed YAML frontmatter.
-- Missing or empty `type`.
-- A reserved `index.md` with frontmatter other than a bundle-root
-  `okf_version` block.
-- A `log.md` whose `## Heading` lines are not ISO `YYYY-MM-DD` dates.
-- A frontmatter `schema` URL that cannot be loaded or compiled — or a
-  `schema` path that cannot be resolved under `--schemas`.
-
-**Warnings** — informative but never fatal (SPEC §11's explicit
-"must-not-reject" list):
-
-- Missing `index.md` in a directory.
-- Broken internal links / unresolvable path-valued frontmatter fields
-  (`resource`, `sources[].resource`, `computation`,
-  `executor.resource`, `attester.resource`). Path resolution is lenient:
-  document-relative first, then bundle-root, and URLs are always fine.
-- `log.md` carrying frontmatter, or log entries not newest-first.
-- `okf_version` in the wrong place or naming an unsupported version.
-
-Unrecognized frontmatter keys, unknown concept `type` values, missing
-optional families, broken *absolute-URL* links, and same-document
-`#anchor` links are *never* flagged (extensions are blessed, SPEC §4.1;
-types are not registered centrally, SPEC §4.1; anchors resolve to the
-document carrying the link). If an editor needs stricter per-type or
-per-family rules, they put them in their own schema and reference it from
-the `schema` key — the validator does not judge what a custom schema
-requires.
-
-### Choosing the schema
-
-Field-level validation of a concept's frontmatter follows one rule:
-
-- If the document's frontmatter has a `schema` key whose value is an
-  `https`, `http`, or `file` URL, the validator loads that schema and
-  validates the document's fields against it (per document — a bundle may
-  mix schemas).
-- Otherwise, if the value is a **path** (for example `schema: revenue` or
-  `schema: trusted/revenue.schema.json`) and a `--schemas <dir>` flag was
-  passed, the validator resolves it under that directory — trying the path
-  as written, then `path.schema.json` — and validates against the file it
-  finds. References that escape the directory (e.g. `../…`) are rejected.
-- Otherwise the default schema at
-  `https://raw.githubusercontent.com/ThingsAI-io/okf-validator/main/schemas/okf/v0.2/schema.json`
-  is used.
-
-If `--schemas` is not given, path-like `schema` values are treated as
-unspecified and the default schema is used. `schema` itself is an ordinary
-optional key; it is never flagged either way.
-
-## The default schema
-
-The single bundled schema, `schemas/okf/v0.2/schema.json`, covers only
-the common OKF v0.2 concept fields:
-
-- `type` (REQUIRED), `title`, `description`, `resource`, `tags`
-- provenance family: `sources`, `usage_window`
-- trust family: `generated`, `verified`
-- lifecycle family: `status` (`draft`|`stable`|`deprecated`), `stale_after`
-- computation family (SPEC §10): `runtime`, `parameters`, `computation`,
-  `executor`, `attester`
-
-It is deliberately permissive: `type` is the only required key, the
-family fields are loosely typed, and `additionalProperties: true` means
-any producer-defined key passes. Strictness is the bundle editor's job —
-via a custom `schema` URL.
-
-> If you rename or move this repository, update `SCHEMA_ORG`,
-> `SCHEMA_REPO`, and `SCHEMA_BRANCH` in `src/versions.js` and the `$id`
-> in `schemas/okf/v0.2/schema.json`. They must stay in sync.
-
-## CI/CD
-
-`.github/workflows/ci.yml`:
-
-- **test** — `npm ci && npm test` on Node 18 and 24, plus a fixture smoke
-  run (`npm run validate`).
-- **official** — clones
-  `GoogleCloudPlatform/knowledge-catalog`, checks out the **pinned**
-  commit from `spec/official-corpus-pin.txt`, and runs
-  `npm run validate:official`. The validator must report zero errors on
-  the official bundles or CI fails.
-- **publish** — on tags matching `v*` (after test + official pass),
-  `npm publish`es the scoped public package.
-
-### What the maintainers need to configure
-
-- An npm **publish token** with `publish` scope for `thingsai`,
-  stored as the `NPM_TOKEN` GitHub Actions secret.
-- This repo must be **public** (scoped public package + schema URLs).
-- To declare a release: `npm version <x.y.z> && git push && git push`
-  then tag `git tag v<x.y.z> && git push --tags`. The tag name must equal
-  the `package.json` version.
-
-### Bumping the official corpus pin
-
-Upstream bundles change over time. To adopt a newer corpus deliberately:
-
-```sh
-npm run update-official-pin        # uses ../knowledge-catalog, or set OKF_OFFICIAL_REPO
-git diff spec/official-corpus-pin.txt   # review that the new HEAD/commit line changed
-git add spec/official-corpus-pin.txt && git commit
-```
-
-`update-official-pin` refuses to pin a corpus that does not validate
-cleanly. Pinning is always a reviewed, explicit act — CI never silently
-moves the goalposts.
-
-## Development
-
-```sh
-npm install
-npm test              # unit + fixture + official-corpus tests (corpus skipped if absent)
-npm run validate      # CLI smoke test against test/fixtures/valid-bundle
-npm run validate:official   # full official-bundle run (needs ../knowledge-catalog or OKF_OFFICIAL_REPO)
-```
+Never flagged: unknown keys, unknown `type` values, absolute-URL links, `#anchor` links.
 
 ## License
 
