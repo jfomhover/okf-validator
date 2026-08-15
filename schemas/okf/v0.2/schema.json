@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/ThingsAI-io/okf-validator/main/schemas/okf/v0.2/schema.json",
+  "title": "OKF v0.2 Concept (default schema)",
+  "description": "The default schema for the YAML frontmatter of an OKF v0.2 concept document (Open Knowledge Format v0.2 specification, §4, §5, §10). It is the ONLY bundled schema: it covers only the common OKF v0.2 fields. `type` is the only required key and unknown keys are allowed (SPEC §4.1, §11), so everything else is left to the bundle editor. An editor who needs more strictness points a document at a custom schema via its `schema` frontmatter key (a URL); the validator then uses that schema instead of this one.",
+  "$defs": {
+    "nonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "isoDate": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "isoDateTime": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?(Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "actor": {
+      "type": "string",
+      "pattern": "^(human:[^ ]+|process:[^ ]+|[^ /]+/[^ /]+)$"
+    },
+    "generated": {
+      "type": "object",
+      "required": ["by"],
+      "properties": {
+        "by": {
+          "$ref": "#/$defs/actor"
+        },
+        "at": {
+          "$ref": "#/$defs/isoDateTime"
+        }
+      },
+      "additionalProperties": true
+    },
+    "verifiedEntry": {
+      "type": "object",
+      "required": ["by"],
+      "properties": {
+        "by": {
+          "$ref": "#/$defs/actor"
+        },
+        "at": {
+          "$ref": "#/$defs/isoDateTime"
+        }
+      },
+      "additionalProperties": true
+    },
+    "usageWindow": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "$ref": "#/$defs/isoDate"
+        },
+        "to": {
+          "$ref": "#/$defs/isoDate"
+        }
+      },
+      "additionalProperties": true
+    },
+    "sourcesEntry": {
+      "type": "object",
+      "required": ["resource"],
+      "properties": {
+        "resource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "title": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "author": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "usage_count": {
+          "type": "integer"
+        },
+        "last_modified": {
+          "$ref": "#/$defs/isoDate"
+        },
+        "usage_window": {
+          "$ref": "#/$defs/usageWindow"
+        }
+      },
+      "additionalProperties": true
+    },
+    "parameter": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "type": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "required": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": true
+    },
+    "executor": {
+      "type": "object",
+      "properties": {
+        "resource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "receipt": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    },
+    "attester": {
+      "type": "object",
+      "properties": {
+        "resource": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "type": "object",
+  "required": ["type"],
+  "properties": {
+    "type": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "title": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "description": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "resource": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/nonEmptyString"
+      }
+    },
+    "status": {
+      "enum": ["draft", "stable", "deprecated"]
+    },
+    "stale_after": {
+      "$ref": "#/$defs/isoDate"
+    },
+    "generated": {
+      "$ref": "#/$defs/generated"
+    },
+    "verified": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/verifiedEntry"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/verifiedEntry"
+          }
+        }
+      ]
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sourcesEntry"
+      }
+    },
+    "usage_window": {
+      "$ref": "#/$defs/usageWindow"
+    },
+    "runtime": {
+      "$ref": "#/$defs/nonEmptyString"
+    },
+    "parameters": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/parameter"
+      }
+    },
+    "computation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "executor": {
+      "$ref": "#/$defs/executor"
+    },
+    "attester": {
+      "$ref": "#/$defs/attester"
+    },
+    "okf_version": {
+      "type": ["string", "number"]
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,40 @@
+{
+  "name": "@thingsai/okf-validator",
+  "version": "0.1.2",
+  "description": "Validate Open Knowledge Format (OKF) v0.2 bundles: parse markdown + YAML frontmatter, check OKF v0.2 conformance, and validate frontmatter against the versioned default OKF JSON Schema or a per-document custom schema URL.",
+  "license": "MIT",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./schemas/*": "./schemas/*",
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "okf-validate": "./bin/okf-validate.mjs"
+  },
+  "files": [
+    "src",
+    "schemas",
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node --test",
+    "validate": "node bin/okf-validate.mjs test/fixtures/valid-bundle",
+    "validate:official": "node scripts/validate-official.mjs",
+    "update-official-pin": "node scripts/update-official-pin.mjs",
+    "prepublishOnly": "npm test"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "yaml": "^2.9.0"
+  }
+}

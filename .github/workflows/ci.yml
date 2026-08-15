@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test (node ${{ matrix.node }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [18, 24]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm test
+
+      - name: Smoke-check the CLI on the bundled fixture
+        run: npm run validate
+
+  official:
+    name: Official corpus
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Clone official OKF repo at the pinned commit
+        run: |
+          PIN=$(grep -m1 -E '^[0-9a-f]{40}$' spec/official-corpus-pin.txt)
+          if [ -z "$PIN" ]; then
+            echo "No valid pin found in spec/official-corpus-pin.txt" >&2
+            exit 1
+          fi
+          git clone https://github.com/GoogleCloudPlatform/knowledge-catalog.git ../knowledge-catalog
+          git -C ../knowledge-catalog checkout --detach "$PIN"
+
+      - name: Validate the validator against the official bundles
+        run: npm run validate:official
+
+  publish:
+    name: Publish npm package
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [test, official]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Publish (prepublishOnly runs the test suite)
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

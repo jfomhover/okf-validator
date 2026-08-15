@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fixture: a bundle editor's private schema",
+  "description": "A custom schema a bundle editor points a concept at via the `schema` frontmatter key. Validator uses this instead of the default OKF v0.2 schema for documents that reference it.",
+  "type": "object",
+  "required": ["type", "runtime"],
+  "properties": {
+    "type": {
+      "type": "string",
+      "minLength": 1
+    },
+    "runtime": {
+      "enum": ["bigquery", "postgres", "dbt", "python", "Looker"]
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "additionalProperties": true
+}

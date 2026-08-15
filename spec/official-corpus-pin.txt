@@ -1,0 +1,6 @@
+This file pins the GoogleCloudPlatform/knowledge-catalog commit used by:
+  - scripts/validate-official.mjs
+  - test/official-bundles.test.mjs
+
+Current pin:
+fe3268a70e8ca5110a43a8f1dfdf6d1a458cf79f
