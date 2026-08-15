@@ -1,0 +1,38 @@
+name: Validate Skills
+
+on:
+  push:
+    paths:
+      - "skills/**"
+      - ".github/workflows/validate-skills.yml"
+  pull_request:
+    paths:
+      - "skills/**"
+      - ".github/workflows/validate-skills.yml"
+
+env:
+  SKILLS_DIR: skills
+  SKILL_VALIDATOR_VERSION: v1.6.0
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: stable
+          cache: false
+
+      - name: Install skill-validator
+        run: go install github.com/agent-ecosystem/skill-validator/cmd/skill-validator@${{ env.SKILL_VALIDATOR_VERSION }}
+
+      - name: Validate skills
+        run: |
+          # Validate every skill under $SKILLS_DIR. Fails on errors; emits inline
+          # PR annotations and a markdown report to the job summary.
+          skill-validator check --strict --emit-annotations -o markdown "$SKILLS_DIR" \
+            | tee >(grep -v '^::' >> "${GITHUB_STEP_SUMMARY:-/dev/null}")
