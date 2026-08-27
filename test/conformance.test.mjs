@@ -300,6 +300,7 @@ test('links to a file carrying an anchor resolve via the file part', async () =>
     'tables/index.md': '# Tables\n',
     'tables/orders.md': '---\ntype: Note\n---\nbody\n',
   });
+  write(root, 'index.md', '# Bundle\n\n* [Model](model/)\n* [Tables](tables/)\n');
   const result = await validateBundle(root);
   assert.equal(result.ok, true, issueText(result));
   assert.equal(result.warnings.length, 0, JSON.stringify(result.warnings, null, 2));
@@ -323,7 +324,7 @@ test('unresolvable path-valued frontmatter fields are warnings', async () => {
 
 test('unslashed root-relative path fields resolve leniently', async () => {
   const root = tempRoot();
-  write(root, 'index.md', '# B\n');
+  write(root, 'index.md', '# B\n\n* [Computations](computations/)\n');
   write(root, 'computations/index.md', '# Computations\n');
   write(root, 'computations/revenue.md',
     '---\ntype: Attested Computation\nruntime: bigquery\ncomputation: computeds/revenue.sql\n---\nbody\n');
@@ -340,4 +341,29 @@ test('a directory with concepts but no index.md warns', async () => {
   const result = await validateBundle(root);
   assert.equal(result.ok, true);
   assert.match(issueText(result), /notes\/index\.md.*missing index\.md/);
+});
+
+test('an index warns when it omits a link to a Markdown subdirectory', async () => {
+  const root = bundle({
+    'tables/index.md': '# Tables\n',
+    'metrics/index.md': '# Metrics\n',
+  });
+  write(root, 'index.md', '# Bundle\n\n* [Tables](tables/)\n');
+
+  const result = await validateBundle(root);
+  assert.equal(result.ok, true, errorText(result));
+  assert.match(issueText(result), /index\.md is missing a link to subdirectory `metrics\//);
+  assert.doesNotMatch(issueText(result), /missing a link to subdirectory `tables\//);
+});
+
+test('an index with links to all Markdown subdirectories has no subdirectory-link warning', async () => {
+  const root = bundle({
+    'tables/index.md': '# Tables\n',
+    'metrics/index.md': '# Metrics\n',
+  });
+  write(root, 'index.md', '# Bundle\n\n* [Tables](tables/)\n* [Metrics](metrics/index.md)\n');
+
+  const result = await validateBundle(root);
+  assert.equal(result.ok, true, issueText(result));
+  assert.doesNotMatch(issueText(result), /missing a link to subdirectory/);
 });
