@@ -94,16 +94,46 @@ function directMarkdownSubdirectories({ relPath, relDirs, relFiles }) {
 }
 
 /**
- * Checks that each index links to each direct Markdown-containing subdirectory.
- * Progressive disclosure is recommended but optional, so omitted links are WARNs.
+ * Finds direct concept Markdown files for an index.
+ * Reserved index.md and log.md files are structural files, not index entries.
  */
-export function validateIndexSubdirectories({ relPath, body, fileSet, relDirs, relFiles, result }) {
+function directMarkdownFiles({ relPath, relFiles }) {
+  const parent = path.posix.dirname(relPath) === '.' ? '' : path.posix.dirname(relPath);
+  const prefix = parent ? `${parent}/` : '';
+  return relFiles.filter((file) => {
+    if (!file.startsWith(prefix) || !file.endsWith('.md')) {
+      return false;
+    }
+    const remainder = file.slice(prefix.length);
+    if (!remainder || remainder.includes('/')) {
+      return false;
+    }
+    const baseName = path.posix.basename(file);
+    return baseName !== 'index.md' && baseName !== 'log.md';
+  });
+}
+
+/**
+ * Checks that each index links to each direct concept file and
+ * Markdown-containing subdirectory. Progressive disclosure is recommended
+ * but optional, so omitted entries are WARNs.
+ */
+export function validateIndexContents({ relPath, body, fileSet, relDirs, relFiles, result }) {
   const linked = new Set(
     extractLinks(body)
       .map((target) => resolveTarget({ target, fileRel: relPath, fileSet }))
       .filter((resolved) => resolved.ok && resolved.matching)
       .map((resolved) => resolved.matching.toLowerCase())
   );
+
+  for (const file of directMarkdownFiles({ relPath, relFiles })) {
+    if (!linked.has(file.toLowerCase())) {
+      result.addWarning(
+        relPath,
+        `index.md is missing a link to file \`${file}\` (OKF v0.2 §8, optional)`
+      );
+    }
+  }
 
   for (const directory of directMarkdownSubdirectories({ relPath, relDirs, relFiles })) {
     if (!linked.has(`${directory}/index.md`.toLowerCase())) {

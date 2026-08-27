@@ -1,6 +1,6 @@
 import { parseDocument } from '../parser.js';
 import { SUPPORTED_OKF_VERSIONS } from '../schemas.js';
-import { validateBodyLinks, validateIndexSubdirectories } from './links.js';
+import { validateBodyLinks, validateIndexContents } from './links.js';
 
 const LOG_HEADING_RE = /^##\s+(.+)$/;
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -47,7 +47,7 @@ export function validateIndex({ relPath, text, fileSet, relDirs, relFiles, resul
   }
 
   validateBodyLinks({ relPath, body: parsed.body, fileSet, result });
-  validateIndexSubdirectories({ relPath, body: parsed.body, fileSet, relDirs, relFiles, result });
+  validateIndexContents({ relPath, body: parsed.body, fileSet, relDirs, relFiles, result });
 }
 
 /**

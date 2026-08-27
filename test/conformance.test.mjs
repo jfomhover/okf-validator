@@ -151,6 +151,7 @@ test('log.md entries that are not newest-first warn', async () => {
 
 test('unknown concept types are accepted with no issues', async () => {
   const root = bundle({ 'a.md': '---\ntype: MyCustomType\n---\nbody\n' });
+  write(root, 'index.md', '# Bundle\n\n* [A](a.md)\n');
   const result = await validateBundle(root);
   assert.equal(result.ok, true, issueText(result));
   assert.equal(result.warnings.length, 0, JSON.stringify(result.warnings, null, 2));
@@ -219,6 +220,7 @@ test('a document conforming to its custom schema passes', async () => {
 
 test('a non-URL schema: value is treated as unspecified (default schema applies)', async () => {
   const root = bundle({ 'a.md': '---\ntype: Note\nschema: okf_bundle\n---\nbody\n' });
+  write(root, 'index.md', '# Bundle\n\n* [A](a.md)\n');
   const result = await validateBundle(root);
   assert.equal(result.ok, true, issueText(result));
   assert.equal(result.warnings.length, 0, JSON.stringify(result.warnings, null, 2));
@@ -288,6 +290,7 @@ test('broken internal markdown links are warnings', async () => {
 
 test('same-document anchor links are accepted', async () => {
   const root = bundle({ 'a.md': '---\ntype: Note\n---\n\nJump to the [layers](#the-state-layer-three-sovereigns-three-postures).\n' });
+  write(root, 'index.md', '# Bundle\n\n* [A](a.md)\n');
   const result = await validateBundle(root);
   assert.equal(result.ok, true, issueText(result));
   assert.equal(result.warnings.length, 0, JSON.stringify(result.warnings, null, 2));
@@ -295,9 +298,9 @@ test('same-document anchor links are accepted', async () => {
 
 test('links to a file carrying an anchor resolve via the file part', async () => {
   const root = bundle({
-    'model/index.md': '# Model\n',
+    'model/index.md': '# Model\n\n* [Frontier](frontier.md)\n',
     'model/frontier.md': '---\ntype: Note\n---\n\nSee [orders](tables/orders.md#order-rows).\n',
-    'tables/index.md': '# Tables\n',
+    'tables/index.md': '# Tables\n\n* [Orders](orders.md)\n',
     'tables/orders.md': '---\ntype: Note\n---\nbody\n',
   });
   write(root, 'index.md', '# Bundle\n\n* [Model](model/)\n* [Tables](tables/)\n');
@@ -325,7 +328,7 @@ test('unresolvable path-valued frontmatter fields are warnings', async () => {
 test('unslashed root-relative path fields resolve leniently', async () => {
   const root = tempRoot();
   write(root, 'index.md', '# B\n\n* [Computations](computations/)\n');
-  write(root, 'computations/index.md', '# Computations\n');
+  write(root, 'computations/index.md', '# Computations\n\n* [Revenue](revenue.md)\n');
   write(root, 'computations/revenue.md',
     '---\ntype: Attested Computation\nruntime: bigquery\ncomputation: computeds/revenue.sql\n---\nbody\n');
   write(root, 'computeds/revenue.sql', 'SELECT 1\n');
@@ -347,6 +350,7 @@ test('an index warns when it omits a link to a Markdown subdirectory', async () 
   const root = bundle({
     'tables/index.md': '# Tables\n',
     'metrics/index.md': '# Metrics\n',
+    'overview.md': '---\ntype: Note\n---\nbody\n',
   });
   write(root, 'index.md', '# Bundle\n\n* [Tables](tables/)\n');
 
@@ -354,14 +358,16 @@ test('an index warns when it omits a link to a Markdown subdirectory', async () 
   assert.equal(result.ok, true, errorText(result));
   assert.match(issueText(result), /index\.md is missing a link to subdirectory `metrics\//);
   assert.doesNotMatch(issueText(result), /missing a link to subdirectory `tables\//);
+  assert.match(issueText(result), /index\.md is missing a link to file `overview\.md`/);
 });
 
 test('an index with links to all Markdown subdirectories has no subdirectory-link warning', async () => {
   const root = bundle({
     'tables/index.md': '# Tables\n',
     'metrics/index.md': '# Metrics\n',
+    'overview.md': '---\ntype: Note\n---\nbody\n',
   });
-  write(root, 'index.md', '# Bundle\n\n* [Tables](tables/)\n* [Metrics](metrics/index.md)\n');
+  write(root, 'index.md', '# Bundle\n\n* [Tables](tables/)\n* [Metrics](metrics/index.md)\n* [Overview](overview.md)\n');
 
   const result = await validateBundle(root);
   assert.equal(result.ok, true, issueText(result));
