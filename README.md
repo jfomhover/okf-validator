@@ -61,12 +61,13 @@ The default schema is deliberately permissive: `type` is the only required field
 **Errors** — the bundle is *not* conformant:
 
 - missing, malformed, or non-mapping frontmatter; missing or empty `type`
+- missing `index.md` in a Markdown-containing directory
 - reserved `index.md`/`log.md` violations (frontmatter where it isn't allowed, non-ISO date headings)
 - a `schema:` reference that can't be loaded or resolved
 
 **Warnings** — informative, never fatal:
 
-- missing `index.md`, broken internal links, unresolvable path fields
+- broken internal links, unresolvable path fields
 - `log.md` frontmatter / entries not newest-first, misplaced or unsupported `okf_version`
 
 Never flagged: unknown keys, unknown `type` values, absolute-URL links, `#anchor` links.

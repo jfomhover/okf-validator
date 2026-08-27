@@ -25,7 +25,8 @@ export function walkBundle(bundleRoot) {
 
 /**
  * Checks progressive-disclosure indexes for every Markdown-containing directory.
- * Missing indexes are optional in OKF v0.2, so each finding is a WARN, not an ERROR.
+ * This validator requires an index for every Markdown-containing directory,
+ * so each missing index is an ERROR even though OKF itself describes indexes as optional.
  */
 export function validateIndexPresence({ relDirs, relFiles, result }) {
   const relMd = new Set(relFiles.filter((rel) => rel.endsWith('.md')));
@@ -37,7 +38,7 @@ export function validateIndexPresence({ relDirs, relFiles, result }) {
     }
     const indexRel = `${base}index.md`;
     if (!relMd.has(indexRel)) {
-      result.addWarning(indexRel, 'missing index.md for progressive disclosure (OKF v0.2 §8, optional)');
+      result.addError(indexRel, 'missing index.md for progressive disclosure (OKF v0.2 §8)');
     }
   }
 }

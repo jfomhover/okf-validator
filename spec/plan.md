@@ -25,8 +25,10 @@ is a content-writing template:
 Observations that steer the rewrite:
 
 - The old validator bakes the *wrong* policy for a general OKF tool: it
-  errors on broken links and missing `index.md`, while SPEC §6.1 and §11
-  require consumers to *tolerate* those. Severities must be inverted.
+  errors on broken links, while SPEC §6.1 and §11 require consumers to
+  tolerate those. Missing `index.md` is now an explicit project policy:
+  every Markdown-containing directory must have one and missing indexes
+  are errors.
 - The reference bundles exercise ambiguous corners (e.g.
   `acme_retail/log.md` carries frontmatter; `sources[].resource` values
   like `policies/revenue-recognition.md` are root-relative but lack a

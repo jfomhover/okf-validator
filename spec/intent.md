@@ -141,7 +141,7 @@ base URL (both derive from the GitHub org + repository identity).
     against the default `schemas/okf/v0.2/schema.json`. A schema reference
     that cannot be resolved, loaded, or compiled is an error on that
     document.
-5. Run soft checks (index presence, internal link resolution, optional
+   5. Run checks (required index presence, internal link resolution, optional
    family shape) that are reported as warnings.
 6. Emit a structured report (errors + warnings) and exit non-zero iff any
    errors were found.

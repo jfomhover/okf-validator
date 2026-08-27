@@ -214,6 +214,8 @@ test('a document conforming to its custom schema passes', async () => {
     'computations/revenue.md':
       `---\ntype: Attested Computation\nschema: ${CUSTOM_SCHEMA_REF}\nruntime: bigquery\n---\nbody\n`,
   });
+  write(root, 'index.md', '# Bundle\n\n* [Computations](computations/)\n');
+  write(root, 'computations/index.md', '# Computations\n\n* [Revenue](revenue.md)\n');
   const result = await validateBundle(root);
   assert.equal(result.ok, true, issueText(result));
 });
@@ -240,6 +242,8 @@ test('schemasDir falls back to the .schema.json convention for bare references',
   const root = bundle({
     'computations/revenue.md': '---\ntype: Attested Computation\nschema: custom\nruntime: dbt\n---\nbody\n',
   });
+  write(root, 'index.md', '# Bundle\n\n* [Computations](computations/)\n');
+  write(root, 'computations/index.md', '# Computations\n\n* [Revenue](revenue.md)\n');
   const result = await validateBundle(root, { schemasDir: path.join(FIXTURES, 'schemas') });
   assert.equal(result.ok, true, issueText(result));
 });
@@ -320,6 +324,8 @@ test('unresolvable path-valued frontmatter fields are warnings', async () => {
     'computations/revenue.md':
       '---\ntype: Attested Computation\nruntime: bigquery\ncomputation: references/missing.sql\n---\nbody\n',
   });
+  write(root, 'index.md', '# Bundle\n\n* [Computations](computations/)\n');
+  write(root, 'computations/index.md', '# Computations\n\n* [Revenue](revenue.md)\n');
   const result = await validateBundle(root);
   assert.equal(result.ok, true);
   assert.match(result.warnings.map((w) => w.message).join('\n'), /references\/missing\.sql/);
@@ -337,13 +343,13 @@ test('unslashed root-relative path fields resolve leniently', async () => {
   assert.equal(result.warnings.length, 0, JSON.stringify(result.warnings, null, 2));
 });
 
-test('a directory with concepts but no index.md warns', async () => {
+test('a directory with concepts but no index.md is an error', async () => {
   const root = tempRoot();
   write(root, 'index.md', '# B\n');
   write(root, 'notes/thing.md', '---\ntype: Note\n---\nbody\n');
   const result = await validateBundle(root);
-  assert.equal(result.ok, true);
-  assert.match(issueText(result), /notes\/index\.md.*missing index\.md/);
+  assert.equal(result.ok, false);
+  assert.match(errorText(result), /notes\/index\.md.*missing index\.md/);
 });
 
 test('an index warns when it omits a link to a Markdown subdirectory', async () => {

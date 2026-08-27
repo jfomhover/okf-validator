@@ -67,6 +67,7 @@ Exit codes: `0` all conformant, `1` any errors, `2` usage error. Warnings never 
 **Errors (exit 1):**
 - missing, unterminated, invalid, or non-mapping YAML frontmatter on a concept
 - missing or empty `type`
+- missing `index.md` in a Markdown-containing directory
 - non-root `index.md` carrying frontmatter; root `index.md` with keys other than
   `okf_version`
 - `log.md` heading that is not an ISO `YYYY-MM-DD` date
@@ -75,7 +76,6 @@ Exit codes: `0` all conformant, `1` any errors, `2` usage error. Warnings never 
 - bundle root missing or not a directory
 
 **Warnings (never fail):**
-- missing `index.md` in a directory
 - unsupported or misplaced `okf_version`
 - `log.md` carrying frontmatter, or entries not newest-first
 - internal markdown links that do not resolve to a file in the bundle
