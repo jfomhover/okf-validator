@@ -20,6 +20,7 @@ import {
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SCHEMAS_DIR = path.join(ROOT, 'test', 'fixtures', 'schemas');
+const TOOLKIT_REFERENCE_SCHEMA = path.join(ROOT, 'schemas', 'toolkit', 'reference.schema.json');
 
 test('schemas/okf/v0.2 contains exactly one schema file: schema.json', () => {
   const dir = schemaDir('0.2');
@@ -65,6 +66,25 @@ test('a custom schema loaded by filesystem path validates the same way', async (
   const validate = await loadSchemaFromFile(path.join(SCHEMAS_DIR, 'custom.schema.json'));
   assert.equal(validate({ type: 'Attested Computation', runtime: 'bigquery' }), true);
   assert.equal(validate({ type: 'Attested Computation' }), false);
+});
+
+test('the toolkit reference schema inherits OKF fields and rejects additional fields', async () => {
+  const validate = await loadSchemaFromFile(TOOLKIT_REFERENCE_SCHEMA);
+  const valid = {
+    type: 'Reference',
+    title: 'Example reference',
+    generated: { by: 'human:jean-francois' },
+    reference: {
+      entryType: 'article',
+      citeKey: 'example',
+      title: 'Example reference',
+      year: '2026',
+    },
+  };
+
+  assert.equal(validate(valid), true);
+  assert.equal(validate({ ...valid, owner: 'finance' }), false);
+  assert.equal(validate({ ...valid, reference: { ...valid.reference, owner: 'finance' } }), false);
 });
 
 test('resolveSchemaFile resolves exact paths, .schema.json falls back, and subdirectories', () => {

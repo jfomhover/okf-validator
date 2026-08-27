@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/jfomhover/okf-validator/main/schemas/toolkit/reference.schema.json",
+  "title": "OKF Toolkit Reference",
+  "description": "A strict OKF v0.2 Reference concept containing bibliographic metadata in the reference field.",
+  "$comment": "This schema inherits the common OKF v0.2 frontmatter contract and rejects additional top-level and nested reference fields.",
+  "examples": [
+    {
+      "type": "Reference",
+      "title": "Attention Is All You Need",
+      "reference": {
+        "entryType": "article",
+        "citeKey": "vaswani2017attention",
+        "author": "Vaswani et al.",
+        "title": "Attention Is All You Need",
+        "year": "2017"
+      }
+    }
+  ],
+  "allOf": [
+    {
+      "$ref": "https://raw.githubusercontent.com/jfomhover/okf-validator/main/schemas/okf/v0.2/schema.json#/$defs/okfConcept"
+    },
+    {
+      "type": "object",
+      "required": ["reference"],
+      "properties": {
+        "type": {
+          "const": "Reference"
+        },
+        "reference": {
+          "type": "object",
+          "description": "Bibliographic metadata for the referenced work.",
+          "properties": {
+            "entryType": {
+              "type": "string",
+              "description": "BibTeX entry type such as article, book, inproceedings, misc, or online."
+            },
+            "citeKey": {
+              "type": "string",
+              "description": "Stable citation key used to identify the reference in a BibTeX bibliography."
+            },
+            "author": { "type": "string" },
+            "annote": { "type": "string" },
+            "editor": { "type": "string" },
+            "title": { "type": "string" },
+            "booktitle": { "type": "string" },
+            "journal": { "type": "string" },
+            "school": { "type": "string" },
+            "institution": { "type": "string" },
+            "publisher": { "type": "string" },
+            "organization": { "type": "string" },
+            "series": { "type": "string" },
+            "volume": { "type": "string" },
+            "number": { "type": "string" },
+            "chapter": { "type": "string" },
+            "pages": { "type": "string" },
+            "type": { "type": "string" },
+            "month": { "type": "string" },
+            "year": { "type": "string" },
+            "note": { "type": "string" },
+            "howpublished": { "type": "string" },
+            "address": { "type": "string" },
+            "edition": { "type": "string" },
+            "location": { "type": "string" },
+            "date": { "type": "string" },
+            "comment": { "type": "string" },
+            "abstract": { "type": "string" },
+            "keywords": { "type": "string" },
+            "doi": { "type": "string" },
+            "url": { "type": "string" },
+            "urldate": { "type": "string" },
+            "isbn": { "type": "string" },
+            "issn": { "type": "string" },
+            "eprint": { "type": "string" },
+            "crossref": { "type": "string" },
+            "key": { "type": "string" },
+            "langid": { "type": "string" },
+            "file": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  ],
+  "unevaluatedProperties": false
+}

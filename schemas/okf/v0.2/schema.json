@@ -3,6 +3,14 @@
   "$id": "https://raw.githubusercontent.com/jfomhover/okf-validator/main/schemas/okf/v0.2/schema.json",
   "title": "OKF v0.2 Concept (default schema)",
   "description": "The default schema for the YAML frontmatter of an OKF v0.2 concept document (Open Knowledge Format v0.2 specification, §4, §5, §10). It is the ONLY bundled schema: it covers only the common OKF v0.2 fields. `type` is the only required key and unknown keys are allowed (SPEC §4.1, §11), so everything else is left to the bundle editor. An editor who needs more strictness points a document at a custom schema via its `schema` frontmatter key (a URL); the validator then uses that schema instead of this one.",
+  "$comment": "This schema intentionally provides the permissive common OKF v0.2 contract. Custom schemas may inherit it and add stricter type-specific or domain-specific rules.",
+  "examples": [
+    {
+      "type": "Reference",
+      "title": "Example reference",
+      "description": "A reference concept using only common OKF fields."
+    }
+  ],
   "$defs": {
     "nonEmptyString": {
       "type": "string",
@@ -128,84 +136,94 @@
         }
       },
       "additionalProperties": true
-    }
-  },
-  "type": "object",
-  "required": ["type"],
-  "properties": {
-    "type": {
-      "$ref": "#/$defs/nonEmptyString"
     },
-    "title": {
-      "$ref": "#/$defs/nonEmptyString"
-    },
-    "description": {
-      "$ref": "#/$defs/nonEmptyString"
-    },
-    "resource": {
-      "type": "string",
-      "minLength": 1
-    },
-    "tags": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/nonEmptyString"
-      }
-    },
-    "status": {
-      "enum": ["draft", "stable", "deprecated"]
-    },
-    "stale_after": {
-      "$ref": "#/$defs/isoDate"
-    },
-    "generated": {
-      "$ref": "#/$defs/generated"
-    },
-    "verified": {
-      "oneOf": [
-        {
-          "$ref": "#/$defs/verifiedEntry"
+    "okfConcept": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/nonEmptyString"
         },
-        {
+        "title": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "description": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "resource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tags": {
           "type": "array",
-          "minItems": 1,
           "items": {
-            "$ref": "#/$defs/verifiedEntry"
+            "$ref": "#/$defs/nonEmptyString"
           }
+        },
+        "status": {
+          "enum": ["draft", "stable", "deprecated"]
+        },
+        "stale_after": {
+          "$ref": "#/$defs/isoDate"
+        },
+        "generated": {
+          "$ref": "#/$defs/generated"
+        },
+        "verified": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/verifiedEntry"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/verifiedEntry"
+              }
+            }
+          ]
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourcesEntry"
+          }
+        },
+        "usage_window": {
+          "$ref": "#/$defs/usageWindow"
+        },
+        "runtime": {
+          "$ref": "#/$defs/nonEmptyString"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/parameter"
+          }
+        },
+        "computation": {
+          "type": "string",
+          "minLength": 1
+        },
+        "executor": {
+          "$ref": "#/$defs/executor"
+        },
+        "attester": {
+          "$ref": "#/$defs/attester"
+        },
+        "okf_version": {
+          "type": ["string", "number"]
+        },
+        "schema": {
+          "type": "string"
         }
-      ]
-    },
-    "sources": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/sourcesEntry"
       }
-    },
-    "usage_window": {
-      "$ref": "#/$defs/usageWindow"
-    },
-    "runtime": {
-      "$ref": "#/$defs/nonEmptyString"
-    },
-    "parameters": {
-      "type": "array",
-      "items": {
-        "$ref": "#/$defs/parameter"
-      }
-    },
-    "computation": {
-      "type": "string",
-      "minLength": 1
-    },
-    "executor": {
-      "$ref": "#/$defs/executor"
-    },
-    "attester": {
-      "$ref": "#/$defs/attester"
-    },
-    "okf_version": {
-      "type": ["string", "number"]
     }
   },
-  "additionalProperties": true
+  "allOf": [
+    {
+      "$ref": "#/$defs/okfConcept"
+    }
+  ],
+  "unevaluatedProperties": true
 }

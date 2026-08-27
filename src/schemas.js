@@ -29,6 +29,9 @@ export function isUrlReference(value) {
 }
 
 export async function readSchemaDocument(ref) {
+  if (ref === `${SCHEMA_BASE_URL}/schema.json`) {
+    return readDefaultSchema('0.2');
+  }
   if (/^https?:/i.test(ref)) {
     const response = await fetch(ref);
     if (!response.ok) {
