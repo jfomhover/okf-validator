@@ -48,6 +48,16 @@ test('BOM is stripped before delimiter checks', () => {
   assert.equal(doc.frontmatter.type, 'Note');
 });
 
+test('frontmatter delimiter must begin the first line exactly after an optional BOM', () => {
+  for (const prefix of ['   ', '\t', '\n']) {
+    assert.throws(
+      () => parseConcept(`${prefix}---\ntype: Note\n---\nbody\n`, 'a.md'),
+      /missing YAML frontmatter block/
+    );
+  }
+  assert.equal(parseConcept('\uFEFF---\ntype: Note\n---\nbody\n', 'a.md').frontmatter.type, 'Note');
+});
+
 test('plain markdown without frontmatter reports hasFrontmatter false', () => {
   const doc = parseDocument('# hello\n', 'a.md');
   assert.equal(doc.hasFrontmatter, false);

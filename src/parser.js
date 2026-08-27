@@ -15,14 +15,14 @@ export function isPlainObject(value) {
 export function hasFrontmatter(text) {
   const cleaned = stripBom(text);
   const firstLine = cleaned.split(/\r?\n/, 1)[0];
-  return firstLine !== undefined && firstLine.trim() === FRONTMATTER_DELIM;
+  return firstLine === FRONTMATTER_DELIM;
 }
 
 export function parseDocument(text, filePath) {
   const cleaned = stripBom(text);
   const lines = cleaned.split(/\r?\n/);
 
-  const startLine = lines[0]?.trim();
+  const startLine = lines[0];
   if (startLine !== FRONTMATTER_DELIM) {
     return { frontmatter: null, body: cleaned, hasFrontmatter: false };
   }
