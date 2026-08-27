@@ -1,6 +1,6 @@
 ---
 name: okf-validate
-description: Runs the @thingsai/okf-validator CLI to validate Open Knowledge Format (OKF)
+description: Runs the @jfomhover/okf-validator CLI to validate Open Knowledge Format (OKF)
   v0.2 bundles. The agent checks bundle conformance (missing/malformed frontmatter, type,
   index.md and log.md rules, internal links) and validates each concept's frontmatter
   against the bundled default JSON Schema or a per-document custom schema (URL or a path
@@ -13,7 +13,7 @@ allowed-tools: Read Write Bash(npx:*, npm:*, node:*)
 
 # okf-validate
 
-Validate OKF v0.2 bundles with the `@thingsai/okf-validator` CLI. It checks bundle
+Validate OKF v0.2 bundles with the `@jfomhover/okf-validator` CLI. It checks bundle
 structure and validates concept frontmatter against JSON Schemas. Errors fail the run;
 warnings are reported but never fatal.
 
@@ -29,13 +29,13 @@ warnings are reported but never fatal.
 Install as a dev dependency (needs network on first install):
 
 ```bash
-npm install --save-dev @thingsai/okf-validator
+npm install --save-dev @jfomhover/okf-validator
 ```
 
 For ad-hoc runs without installing, npx pulls the package on demand:
 
 ```bash
-npx --package @thingsai/okf-validator okf-validate --help
+npx --package @jfomhover/okf-validator okf-validate --help
 ```
 
 ## Validate

@@ -6,7 +6,7 @@ Status: **rev 3 (approved & implemented)** — decisions A/B/C confirmed
 
 ## 1. Current state
 
-The repository `okf-starter-kit` (remote `ThingsAI-io/okf-starter-kit`)
+The repository `okf-validator` (remote `jfomhover/okf-validator`)
 is a content-writing template:
 
 - `content/` — a bundled markdown tree (notes, checklists, indexes).
@@ -340,11 +340,11 @@ that cannot be resolved, loaded, or compiled is an error on that document.
 
 ## 7. Decisions (confirmed)
 
-- **A. Package name/scope:** `@thingsai/okf-validator`, public access
+- **A. Package name/scope:** `@jfomhover/okf-validator`, public access
   (`publishConfig.access: "public"`).
 - **B. Schema base URL:** the repository will be renamed to `okf-validator`
-  under the `ThingsAI-io` org, so the canonical base is
-  `https://raw.githubusercontent.com/ThingsAI-io/okf-validator/main/schemas/okf/v0.2/`.
+  under the `jfomhover` account, so the canonical base is
+  `https://raw.githubusercontent.com/jfomhover/okf-validator/main/schemas/okf/v0.2/`.
   `SCHEMA_ORG`/`SCHEMA_REPO`/`SCHEMA_BRANCH` in `src/versions.js` and the
   `$id`s in `schemas/okf/v0.2/**` are the single place this is encoded; if
   the eventual repo name differs, update both together (`npm run` is not

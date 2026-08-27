@@ -1,4 +1,4 @@
-# @thingsai/okf-validator
+# @jfomhover/okf-validator
 
 > ⚠️ **Experimental.** Everything here may change without notice — flags, API, schema, package. Use it with that in mind.
 
@@ -14,7 +14,7 @@ Checks OKF v0.2 conformance out of the box against a single versioned default JS
 ## Quick start
 
 ```sh
-npm install @thingsai/okf-validator
+npm install @jfomhover/okf-validator
 npx okf-validate ./my-bundle
 ```
 
@@ -40,8 +40,8 @@ Exit codes: `0` conformant · `1` errors · `2` usage error. `npx okf-validate -
 It's standard [Agent Skills](https://agentskills.io) (`SKILL.md` + frontmatter), so it works in opencode, Claude Code, Codex, GitHub Copilot CLI, Cursor, and 30+ other agents.
 
 ```sh
-npx skills add ThingsAI-io/okf-validator                              # all skills
-npx skills add ThingsAI-io/okf-validator --skill okf-validate         # just this one
+npx skills add jfomhover/okf-validator                              # all skills
+npx skills add jfomhover/okf-validator --skill okf-validate         # just this one
 ```
 
 Or drop `skills/okf-validate/` into any discovery directory (`.opencode/skills/`, `~/.config/opencode/skills/`, …). Full reference: `skills/okf-validate/references/usage.md`.
@@ -73,4 +73,4 @@ Never flagged: unknown keys, unknown `type` values, absolute-URL links, `#anchor
 
 ## License
 
-MIT © ThingsAI.io
+MIT © jfomhover

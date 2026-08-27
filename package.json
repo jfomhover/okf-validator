@@ -1,5 +1,5 @@
 {
-  "name": "@thingsai/okf-validator",
+  "name": "@jfomhover/okf-validator",
   "version": "0.1.2",
   "description": "Validate Open Knowledge Format (OKF) v0.2 bundles: parse markdown + YAML frontmatter, check OKF v0.2 conformance, and validate frontmatter against the versioned default OKF JSON Schema or a per-document custom schema URL.",
   "license": "MIT",

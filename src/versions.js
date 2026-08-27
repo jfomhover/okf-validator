@@ -1,4 +1,4 @@
-export const SCHEMA_ORG = 'ThingsAI-io';
+export const SCHEMA_ORG = 'jfomhover';
 export const SCHEMA_REPO = 'okf-validator';
 export const SCHEMA_BRANCH = 'main';
 

@@ -1,14 +1,14 @@
 # okf-validate usage reference
 
-The command ships with the `@thingsai/okf-validator` npm package (`bin: okf-validate`).
+The command ships with the `@jfomhover/okf-validator` npm package (`bin: okf-validate`).
 Run it through npx once installed, or without installing via
-`npx --package @thingsai/okf-validator okf-validate ...`. Read this reference when you
+`npx --package @jfomhover/okf-validator okf-validate ...`. Read this reference when you
 need the full flag list, the schema model, or trouble to shoot.
 
 ## What to run
 
 ```bash
-npm install --save-dev @thingsai/okf-validator            # once per project (needs network)
+npm install --save-dev @jfomhover/okf-validator            # once per project (needs network)
 npx okf-validate --help                                    # full flag list
 npx okf-validate <path>...                                 # validate bundle(s)
 npx okf-validate --json <path>...                          # machine-readable report
@@ -85,7 +85,7 @@ Exit codes: `0` all conformant, `1` any errors, `2` usage error. Warnings never 
 
 | symptom | fix |
 |---|---|
-| `command not found: okf-validate` | not installed / not on PATH; install the package or use `npx --package @thingsai/okf-validator okf-validate` |
+| `command not found: okf-validate` | not installed / not on PATH; install the package or use `npx --package @jfomhover/okf-validator okf-validate` |
 | exit 2 | usage error — bad path, unknown flag, `--schemas` dir missing or not a directory; read the message |
 | `could not load frontmatter schema ...` | the `schema:` URL/path is wrong or unreachable; fix the reference or drop `--schemas` |
 | custom schema "ignored" | `--schemas` was not passed, or the `schema:` value is a URL (URLs win over paths) |
