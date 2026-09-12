@@ -4,6 +4,7 @@ import path from 'node:path';
 export const MARKDOWN_LINK_RE = /\[[^\]]*\]\(([^)]+)\)/g;
 
 const EXTERNAL_PREFIXES = ['http://', 'https://', 'mailto:', 'tel:'];
+export const BUNDLE_REFERENCE_PREFIX = 'bundle:';
 
 export function extractLinks(body) {
   const targets = [];
@@ -18,6 +19,10 @@ export function extractLinks(body) {
 
 export function isExternalTarget(target) {
   return EXTERNAL_PREFIXES.some((prefix) => target.startsWith(prefix));
+}
+
+export function isBundleReference(value) {
+  return typeof value === 'string' && value.trim().toLowerCase().startsWith(BUNDLE_REFERENCE_PREFIX);
 }
 
 export function stripAnchor(target) {
@@ -119,6 +124,31 @@ export function resolveTarget({ target, fileRel, fileSet }) {
   }
 
   return { ok: false, reason: 'link or path target does not resolve to a file in the bundle' };
+}
+
+export function resolveBundleTarget({ target, fileSet }) {
+  const clean = target.slice(BUNDLE_REFERENCE_PREFIX.length).trim();
+  const isDirectory = clean.endsWith('/');
+  const base = isDirectory ? clean.slice(0, -1) : clean;
+  const rel = normalizeInRoot(base.replace(/^\/+/, ''));
+  if (!rel) {
+    return {
+      ok: false,
+      escape: /(^|[\\/])\.\.(?:[\\/]|$)/.test(base),
+      reason: 'bundle reference does not identify a file',
+    };
+  }
+
+  for (const candidate of candidatesFor(rel, isDirectory)) {
+    if (fileSet.has(caseFold(candidate))) {
+      return { ok: true, matching: candidate };
+    }
+  }
+
+  return {
+    ok: false,
+    reason: 'bundle reference does not resolve to a file in the bundle',
+  };
 }
 
 export function isPathLike(value) {

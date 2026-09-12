@@ -331,6 +331,52 @@ test('unresolvable path-valued frontmatter fields are warnings', async () => {
   assert.match(result.warnings.map((w) => w.message).join('\n'), /references\/missing\.sql/);
 });
 
+test('bundle: references resolve recursively in custom frontmatter fields', async () => {
+  const root = bundle({
+    'target.md': '---\ntype: Note\n---\nbody\n',
+    'extract.md': '---\ntype: Note\n---\nbody\n',
+    'a.md': [
+      '---',
+      'type: Note',
+      'resource: bundle:/target.md',
+      'graph:',
+      '  - relation: supports',
+      '    target: bundle:/target.md',
+      'source:',
+      '  extract: bundle:/extract.md',
+      '---',
+      'body',
+      '',
+    ].join('\n'),
+  });
+  write(root, 'index.md', '# Bundle\n\n* [Target](target.md)\n* [Extract](extract.md)\n* [A](a.md)\n');
+
+  const result = await validateBundle(root);
+  assert.equal(result.ok, true, issueText(result));
+});
+
+test('missing bundle: references are errors with their frontmatter location', async () => {
+  const root = bundle({
+    'a.md': '---\ntype: Note\ngraph:\n  - target: bundle:/missing.md\n---\nbody\n',
+  });
+  write(root, 'index.md', '# Bundle\n\n* [A](a.md)\n');
+
+  const result = await validateBundle(root);
+  assert.equal(result.ok, false);
+  assert.match(errorText(result), /bundle reference at `frontmatter\.graph\[0\]\.target` \(bundle:\/missing\.md\) does not resolve/);
+});
+
+test('bundle: references that escape the bundle are errors', async () => {
+  const root = bundle({
+    'a.md': '---\ntype: Note\nresource: bundle:../outside.md\n---\nbody\n',
+  });
+  write(root, 'index.md', '# Bundle\n\n* [A](a.md)\n');
+
+  const result = await validateBundle(root);
+  assert.equal(result.ok, false);
+  assert.match(errorText(result), /bundle reference at `frontmatter\.resource` \(bundle:\.\.\/outside\.md\) escapes the bundle root/);
+});
+
 test('unslashed root-relative path fields resolve leniently', async () => {
   const root = tempRoot();
   write(root, 'index.md', '# B\n\n* [Computations](computations/)\n');

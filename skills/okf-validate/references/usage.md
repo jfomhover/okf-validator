@@ -62,6 +62,18 @@ Exit codes: `0` all conformant, `1` any errors, `2` usage error. Warnings never 
 - An unresolvable, unloadable, or uncompilable schema is an **error** on the
   referencing document.
 
+## Explicit bundle references
+
+Use the validator-defined `bundle:` prefix for a frontmatter value that must resolve to a file inside the current bundle:
+
+```yaml
+graph:
+  - relation: supports
+    target: bundle:/concepts/example.md
+```
+
+References are resolved from the bundle root recursively through nested objects and arrays. A missing target or a `..` escape is an error. Ordinary strings and external URLs are unchanged.
+
 ## Error / warning catalog
 
 **Errors (exit 1):**

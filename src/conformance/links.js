@@ -2,8 +2,10 @@ import path from 'node:path';
 
 import {
   extractLinks,
+  isBundleReference,
   isExternalTarget,
   isPathLike,
+  resolveBundleTarget,
   resolveTarget,
 } from '../links.js';
 import { isPlainObject } from '../parser.js';
@@ -29,6 +31,9 @@ export function validateBodyLinks({ relPath, body, fileSet, result }) {
  * These fields may also be scope descriptors, so unresolved local-looking paths are WARNs.
  */
 function validatePathField({ relPath, fieldName, value, fileSet, result }) {
+  if (isBundleReference(value)) {
+    return;
+  }
   if (!isPathLike(value) || isExternalTarget(value)) {
     return;
   }
@@ -41,10 +46,57 @@ function validatePathField({ relPath, fieldName, value, fileSet, result }) {
 }
 
 /**
+ * Recursively checks explicit bundle: references in custom frontmatter fields.
+ * Missing or escaping explicit references are ERRORs because the prefix opts into integrity checking.
+ */
+function validateBundleReferences({ relPath, value, location, fileSet, result }) {
+  if (isBundleReference(value)) {
+    const resolved = resolveBundleTarget({ target: value.trim(), fileSet });
+    if (!resolved.ok) {
+      const detail = resolved.escape ? 'escapes the bundle root' : 'does not resolve to a file in the bundle';
+      result.addError(relPath, `bundle reference at \`${location}\` (${value}) ${detail}`);
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    value.forEach((entry, index) => validateBundleReferences({
+      relPath,
+      value: entry,
+      location: `${location}[${index}]`,
+      fileSet,
+      result,
+    }));
+    return;
+  }
+  if (isPlainObject(value)) {
+    for (const [key, entry] of Object.entries(value)) {
+      if (location === 'frontmatter' && key === 'schema') {
+        continue;
+      }
+      validateBundleReferences({
+        relPath,
+        value: entry,
+        location: `${location}.${key}`,
+        fileSet,
+        result,
+      });
+    }
+  }
+}
+
+/**
  * Checks all OKF fields that can contain bundle-relative paths.
  * Unresolved values remain WARNs because `sources.resource` can be a non-path scope descriptor.
  */
 export function validatePathFields({ relPath, frontmatter, fileSet, result }) {
+  validateBundleReferences({
+    relPath,
+    value: frontmatter,
+    location: 'frontmatter',
+    fileSet,
+    result,
+  });
+
   for (const field of ['resource', 'computation']) {
     const value = frontmatter[field];
     if (typeof value === 'string') {

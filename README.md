@@ -56,6 +56,21 @@ A concept's `schema:` frontmatter key chooses its validator:
 
 The default schema is deliberately permissive: `type` is the only required field, the §5/§10 families are loosely typed, and unknown keys always pass (extensions are legal OKF). Strict per-type rules belong in a custom schema — the validator never judges what your schema requires.
 
+### Explicit bundle references
+
+Use the validator-defined `bundle:` prefix when a frontmatter value must point to a file inside the current bundle:
+
+```yaml
+graph:
+  - relation: supports
+    target: bundle:/concepts/example.md
+
+source:
+  extract: bundle:/extracts/example-page-03.md
+```
+
+`bundle:` references are resolved from the bundle root recursively through arrays and objects. Missing targets and paths that escape the bundle are errors. Ordinary strings, external URLs, and unprefixed resource descriptors keep their existing behavior.
+
 ## What it checks
 
 **Errors** — the bundle is *not* conformant:

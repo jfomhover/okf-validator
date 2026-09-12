@@ -68,6 +68,9 @@ directory containing a `bundles/` folder. Multiple paths are allowed.
   document.
 - Without `--schemas`, plain-path `schema:` values use the bundled default schema —
   they never fail on their own.
+- A frontmatter value beginning with `bundle:` is an explicit bundle-root file
+  reference. Missing targets and `..` escapes are errors, including when nested in
+  arrays or objects.
 - Non-bundle paths and flag mistakes exit `2`; read the printed message.
 
 See `references/usage.md` for the full command reference, the schema model, the

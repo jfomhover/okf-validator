@@ -1,0 +1,20 @@
+# Repository and development metadata
+.git/
+.github/
+.opencode/
+spec/
+skills/
+test/
+scripts/
+coverage/
+node_modules/
+
+# Local and generated files
+*.log
+*.tgz
+.env
+.env.*
+!.env.example
+
+# Development-only documentation
+CHANGELOG.md
