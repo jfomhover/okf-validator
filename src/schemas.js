@@ -32,6 +32,13 @@ export async function readSchemaDocument(ref) {
   if (ref === `${SCHEMA_BASE_URL}/schema.json`) {
     return readDefaultSchema('0.2');
   }
+  const toolkitPrefix = `${SCHEMA_BASE_URL.replace('/schemas/okf/v0.2', '')}/schemas/toolkit/`;
+  if (ref.startsWith(toolkitPrefix) && ref.endsWith('.json')) {
+    const fileName = ref.slice(toolkitPrefix.length);
+    if (!fileName.includes('/') && !fileName.includes('\\')) {
+      return JSON.parse(fs.readFileSync(path.join(schemaDir('0.2'), '..', '..', 'toolkit', fileName), 'utf8'));
+    }
+  }
   if (/^https?:/i.test(ref)) {
     const response = await fetch(ref);
     if (!response.ok) {

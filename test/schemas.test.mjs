@@ -21,6 +21,7 @@ import {
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SCHEMAS_DIR = path.join(ROOT, 'test', 'fixtures', 'schemas');
 const TOOLKIT_REFERENCE_SCHEMA = path.join(ROOT, 'schemas', 'toolkit', 'reference.schema.json');
+const TOOLKIT_GRAPH_SCHEMA = path.join(ROOT, 'schemas', 'toolkit', 'graph.schema.json');
 
 test('schemas/okf/v0.2 contains exactly one schema file: schema.json', () => {
   const dir = schemaDir('0.2');
@@ -74,6 +75,7 @@ test('the toolkit reference schema inherits OKF fields and rejects additional fi
     type: 'Reference',
     title: 'Example reference',
     generated: { by: 'human:jean-francois' },
+    graph: [{ relation: 'cites', target: 'bundle:/references/source.md', note: 'Source relationship.' }],
     reference: {
       entryType: 'article',
       citeKey: 'example',
@@ -83,8 +85,23 @@ test('the toolkit reference schema inherits OKF fields and rejects additional fi
   };
 
   assert.equal(validate(valid), true);
+  assert.equal(validate({
+    ...valid,
+    graph: [{ relation: 'project_specific_relation', target: 'bundle:/references/source.md' }],
+  }), false);
   assert.equal(validate({ ...valid, owner: 'finance' }), false);
   assert.equal(validate({ ...valid, reference: { ...valid.reference, owner: 'finance' } }), false);
+});
+
+test('the toolkit graph schema validates reusable typed relationships', async () => {
+  const validate = await loadSchemaFromFile(TOOLKIT_GRAPH_SCHEMA);
+  assert.equal(validate([
+    { relation: 'supports', target: 'bundle:/concepts/example.md' },
+    { relation: 'implements', target: 'bundle:/frameworks/example.md', note: 'Implementation link.' },
+    { relation: 'project_specific_relation', target: 'bundle:/custom/example.md' },
+  ]), true);
+  assert.equal(validate([{ relation: 'supports', target: 'concepts/example.md' }]), false);
+  assert.equal(validate([{ relation: 'supports', target: 'bundle:/concepts/example.md', extra: true }]), false);
 });
 
 test('resolveSchemaFile resolves exact paths, .schema.json falls back, and subdirectories', () => {

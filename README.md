@@ -71,6 +71,8 @@ source:
 
 `bundle:` references are resolved from the bundle root recursively through arrays and objects. Missing targets and paths that escape the bundle are errors. Ordinary strings, external URLs, and unprefixed resource descriptors keep their existing behavior.
 
+The reusable `schemas/toolkit/graph.schema.json` defines the graph shape and requires `bundle:` targets. Composing toolkit or project schemas choose the relationship vocabulary, such as `supports`, `derived_from`, `cites`, `depends_on`, or `implements`.
+
 ## What it checks
 
 **Errors** — the bundle is *not* conformant:

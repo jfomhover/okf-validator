@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/jfomhover/okf-validator/main/schemas/toolkit/graph.schema.json",
+  "title": "OKF Toolkit Graph",
+  "description": "Typed relationships from one OKF concept to other concepts in the bundle.",
+  "$comment": "The graph schema is reusable by toolkit and project-specific concept schemas. Targets use explicit bundle-root-relative references.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["relation", "target"],
+    "properties": {
+      "relation": {
+        "type": "string",
+        "minLength": 1,
+        "description": "A relationship name defined by the composing concept schema."
+      },
+      "target": {
+        "type": "string",
+        "pattern": "^bundle:/.+\\.md$",
+        "description": "A bundle-root-relative target concept, for example bundle:/concepts/example.md."
+      },
+      "note": {
+        "type": "string",
+        "minLength": 1,
+        "description": "Optional context explaining the relationship."
+      }
+    },
+    "additionalProperties": false
+  }
+}

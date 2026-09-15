@@ -28,6 +28,37 @@
         "type": {
           "const": "Reference"
         },
+        "graph": {
+          "allOf": [
+            {
+              "$ref": "https://raw.githubusercontent.com/jfomhover/okf-validator/main/schemas/toolkit/graph.schema.json"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "relation": {
+                    "enum": [
+                      "derived_from",
+                      "based_on",
+                      "supports",
+                      "contradicts",
+                      "corroborates",
+                      "related_to",
+                      "updates",
+                      "operationalizes",
+                      "uses_as_case",
+                      "cites",
+                      "depends_on",
+                      "implements"
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        },
         "reference": {
           "type": "object",
           "description": "Bibliographic metadata for the referenced work.",

@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Added reusable `schemas/toolkit/graph.schema.json` for typed `graph` relationships.
+- Added graph composition to the toolkit reference schema.
+
 ## 0.1.7 - 2026-08-28
 
 ### Added
